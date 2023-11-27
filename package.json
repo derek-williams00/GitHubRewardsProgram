@@ -1,0 +1,18 @@
+{
+	"name": "hardhat-template",
+	"version": "1.0.0",
+	"description": "Contains a single contract that allows each user to save and read their own stored string value.",
+	"private": true,
+	"scripts": {
+		"compile": "pnpm --filter ./hardhat run compile",
+		"test": "pnpm --filter ./hardhat run test",
+		"test:gas": "pnpm --filter ./hardhat run test:gas",
+		"node": "pnpm --filter ./hardhat run node",
+		"deploy": "pnpm --filter ./hardhat run deploy",
+		"deploy:zkEVM": "pnpm --filter ./hardhat run deploy:zkEVM",
+		"verify:zkEVM": "pnpm --filter ./hardhat run verify:zkEVM"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}

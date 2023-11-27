@@ -1,0 +1,29 @@
+{
+	"name": "hardhat-contracts",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"scripts": {
+		"compile": "npx hh compile",
+		"test": "npx hh test",
+		"test:gas": "REPORT_GAS=true npx hh test",
+		"node": "npx hh node",
+		"deploy": "npx hh run scripts/HelloWorld.deploy.ts",
+		"deploy:zkEVM": "npx hh run scripts/HelloWorld.deploy.ts --network zkEVM",
+		"verify:zkEVM": "npx hardhat verify --network zkEVM"
+	},
+	"devDependencies": {
+		"@nomicfoundation/hardhat-toolbox": "^3.0.0",
+		"@nomicfoundation/hardhat-verify": "^2.0.0",
+		"dotenv": "^16.3.1",
+		"find-config": "^1.0.0",
+		"hardhat": "^2.19.0",
+		"hardhat-shorthand": "^1.0.0"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@openzeppelin/contracts": "^5.0.0"
+	}
+}

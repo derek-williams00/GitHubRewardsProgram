@@ -3,6 +3,8 @@ pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+// Contract for individual tasks
+//  Coorresponds to a single issue in a GitHub repository
 contract Task is Ownable {
 
     // Contributor information
@@ -13,6 +15,9 @@ contract Task is Ownable {
     // Task information
     string public repoId;
     string public taskId;
+
+    // Task exists
+    bool public exists = false;
 
 
     enum TaskStatus { OPEN, IN_PROGRESS, COMPLETE, CANCELED }
@@ -36,6 +41,7 @@ contract Task is Ownable {
         taskStatus = TaskStatus.OPEN;
         contributor = address(0x0);
         mainContractAddress = msg.sender;
+        exists = true;
     }
 
     function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOwner onlyOpen {
@@ -44,7 +50,7 @@ contract Task is Ownable {
         taskStatus = TaskStatus.IN_PROGRESS;
     }
 
-    function removeContributor() public onlyOwner {
+    function removeContributor() public onlyOwner onlyNotClosed() {
         contributor = address(0x0);
         contributorGithubId = "";
         contributorPreferredPaymentMehtod = "";
@@ -52,18 +58,31 @@ contract Task is Ownable {
     }
 
     function setTaskCanceled() public onlyOwner {
+        // Refund the admin
+        // TODO: We might need to change this to be compatible with CCIP
+        payable(owner()).transfer(address(this).balance);
+
+        // TODO: get upkeep contract address and stop it
         taskStatus = TaskStatus.CANCELED;
-        // TODO: refund the admin
     }
     
-    function setTaskComplete() public onlyUpkeepContract {
+    function setTaskComplete() public onlyUpkeepContract onlyNotClosed {
         taskStatus = TaskStatus.COMPLETE;
-        // TODO: send the money to the contributor??
+        
+        // Send the reward to the contributor
+        // TODO: We might need to change this to be compatible with CCIP
+        payable(contributor).transfer(address(this).balance);
     }
 
-    function setContributorPreferredPaymentMethod(string memory _contributorPreferredPaymentMethod) public onlyContributor {
+    function setContributorPreferredPaymentMethod(string memory _contributorPreferredPaymentMethod) public onlyContributor onlyNotClosed {
         contributorPreferredPaymentMehtod = _contributorPreferredPaymentMethod;
     }
+
+    function notClosed() public view returns (bool) {
+        return (taskStatus != TaskStatus.CANCELED) && (taskStatus != TaskStatus.COMPLETE);
+    }
+
+    /* MODIFIERS */
 
     modifier onlyContributor() {
         require(msg.sender == contributor, "Only the contributor can call this function.");
@@ -81,7 +100,12 @@ contract Task is Ownable {
     }
 
     modifier onlyOpen() {
-        require(taskStatus == TaskStatus.OPEN, "The task is not open.");
+        require(taskStatus == TaskStatus.OPEN, "This function can only be called for open tasks.");
+        _;
+    }
+
+    modifier onlyNotClosed() {
+        require(notClosed(), "This function can only be called for tasks that are not closed.");
         _;
     }
 

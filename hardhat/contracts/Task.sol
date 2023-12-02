@@ -3,6 +3,8 @@ pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+import "./CCIPSender.sol";
+
 // Contract for individual tasks
 //  Coorresponds to a single issue in a GitHub repository
 contract Task is Ownable {
@@ -10,9 +12,9 @@ contract Task is Ownable {
     // Contributor information
     address public contributor;
     string public contributorGithubId;
-    string private contributorPreferredPaymentMehtod;
+    string private contributorPreferredPaymentMethod;
 
-    // Task information
+    // GitHub Issue information
     string public repoId;
     string public taskId;
 
@@ -44,6 +46,22 @@ contract Task is Ownable {
         exists = true;
     }
 
+    function setUpkeepContractAddress(address _upkeepContractAddress) public onlyMainContract onlyNotClosed {
+        upkeepContractAddress = _upkeepContractAddress;
+    }
+
+    function transferRewardsCrossChain(address _contributor, uint256 _amount) public onlyUpkeepContract onlyNotClosed {
+        require(address(CCIPSender) != address(0), "CCIP Sender Contract not set");
+        require(_amount <= address(this).balance, "Insufficient balance for rewards");
+
+        // Call CCIP sender contract to initiate cross-chain transfer
+        // CCIPSenderContract is an instance of your CCIP sender contract
+        CCIPSender.transferTokens(_contributor, _amount);
+
+        emit CrossChainTransferInitiated(_contributor, _amount);
+    }
+
+
     function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOwner onlyOpen {
         contributor = _contributor;
         contributorGithubId = _contributorGithubId;
@@ -57,7 +75,7 @@ contract Task is Ownable {
         taskStatus = TaskStatus.OPEN;
     }
 
-    function setTaskCanceled() public onlyOwner {
+    function setTaskCanceled() public onlyOwner onlyNotClosed {
         // Refund the admin
         // TODO: We might need to change this to be compatible with CCIP
         payable(owner()).transfer(address(this).balance);

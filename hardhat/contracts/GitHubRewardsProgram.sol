@@ -20,10 +20,24 @@ contract GitHubRewardsProgram {
     /* ADMIN FUNCTIONS        */
     /**************************/
 
+    /* TODO:
+      Funds Allocation:
+        When creating a task, allocate funds to cover potential CCIP transaction fees.
+        This could involve sending LINK or native tokens to the task contract.
+
+      Task Creation and Management:
+        Your existing createTask and cancelTask functions should integrate with the
+        modified Task.sol contract to ensure seamless cross-chain interactions.
+    */
+
     function createTask(string memory _repoId, string memory _taskId) public payable {
         require(taskContracts[_repoId][_taskId] == address(0x0), "Task already exists");
         address newTask = address(new Task(msg.sender, _repoId, _taskId));
         taskContracts[_repoId][_taskId] = newTask;
+
+        // TODO: create cooresponding upkeep contract and set address in task contract
+        // LIKE THIS? 
+        newTask.setUpkeepContractAddress(address(new GitHubUpkeep(address(newTask))));
 
         //Transfer attached funds to the new task contract (msg.value)
         // TODO: We might need to change this to be compatible with CCIP
@@ -61,6 +75,10 @@ contract GitHubRewardsProgram {
         require(task.contributor() == msg.sender);
         task.removeContributor();
     }
+
+    /**************************/
+    /* INTERNAL FUNCTIONS     */
+    /**************************/
 
 
     /**************************/

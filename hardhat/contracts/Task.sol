@@ -32,7 +32,7 @@ contract Task is Ownable {
     // TODO: add payment information
     // How-To: https://www.youtube.com/watch?v=FQe91txqP6k
 
-    constructor(address _admin, string memory _repoId, string memory _taskId, address _mainContract) payable Ownable(_admin) {
+    constructor(address _admin, string memory _repoId, string memory _taskId, address _mainContract) Ownable(_admin) {
         // The task admin is the owner of the contract
         //transferOwnership(_admin);
         repoId = _repoId;
@@ -42,6 +42,12 @@ contract Task is Ownable {
         mainContractAddress = _mainContract;
         exists = true;
     }
+
+    // Fallback function
+    fallback() external payable {}
+
+    // Receive function
+    receive() external payable {}
 
     function setUpkeepContractAddress(address _upkeepContractAddress) public onlyMainContract onlyNotClosed {
         upkeepContractAddress = _upkeepContractAddress;

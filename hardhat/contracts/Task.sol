@@ -3,14 +3,12 @@ pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "./CCIPSender.sol";
-
 // Contract for individual tasks
 //  Coorresponds to a single issue in a GitHub repository
 contract Task is Ownable {
 
     // Contributor information
-    address public contributor;
+    address payable public contributor;
     string public contributorGithubId;
     string private contributorPreferredPaymentMethod;
 
@@ -20,7 +18,6 @@ contract Task is Ownable {
 
     // Task exists
     bool public exists = false;
-
 
     enum TaskStatus { OPEN, IN_PROGRESS, COMPLETE, CANCELED }
     TaskStatus public taskStatus;
@@ -35,20 +32,22 @@ contract Task is Ownable {
     // TODO: add payment information
     // How-To: https://www.youtube.com/watch?v=FQe91txqP6k
 
-    constructor(address _admin, string memory _repoId, string memory _taskId) Ownable(_admin) {
+    constructor(address _admin, string memory _repoId, string memory _taskId, address _mainContract) payable Ownable(_admin) {
         // The task admin is the owner of the contract
         //transferOwnership(_admin);
         repoId = _repoId;
         taskId = _taskId;
         taskStatus = TaskStatus.OPEN;
-        contributor = address(0x0);
-        mainContractAddress = msg.sender;
+        contributor = payable(0x0);
+        mainContractAddress = _mainContract;
         exists = true;
     }
 
     function setUpkeepContractAddress(address _upkeepContractAddress) public onlyMainContract onlyNotClosed {
         upkeepContractAddress = _upkeepContractAddress;
     }
+
+    /* TODO: use a CCIPSender instance
 
     function transferRewardsCrossChain(address _contributor, uint256 _amount) public onlyUpkeepContract onlyNotClosed {
         require(address(CCIPSender) != address(0), "CCIP Sender Contract not set");
@@ -58,20 +57,22 @@ contract Task is Ownable {
         // CCIPSenderContract is an instance of your CCIP sender contract
         CCIPSender.transferTokens(_contributor, _amount);
 
-        emit CrossChainTransferInitiated(_contributor, _amount);
+        emit CCIPSender.CrossChainTransferInitiated(_contributor, _amount);
     }
+    
+    */
 
 
     function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOwner onlyOpen {
-        contributor = _contributor;
+        contributor = payable(_contributor);
         contributorGithubId = _contributorGithubId;
         taskStatus = TaskStatus.IN_PROGRESS;
     }
 
     function removeContributor() public onlyOwner onlyNotClosed() {
-        contributor = address(0x0);
+        contributor = payable(0x0);
         contributorGithubId = "";
-        contributorPreferredPaymentMehtod = "";
+        contributorPreferredPaymentMethod = "";
         taskStatus = TaskStatus.OPEN;
     }
 
@@ -93,7 +94,7 @@ contract Task is Ownable {
     }
 
     function setContributorPreferredPaymentMethod(string memory _contributorPreferredPaymentMethod) public onlyContributor onlyNotClosed {
-        contributorPreferredPaymentMehtod = _contributorPreferredPaymentMethod;
+        contributorPreferredPaymentMethod = _contributorPreferredPaymentMethod;
     }
 
     function notClosed() public view returns (bool) {

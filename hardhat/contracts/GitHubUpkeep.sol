@@ -17,6 +17,10 @@ contract GitHubUpkeep is KeeperCompatibleInterface {
 
     address public task;
 
+    //TODO: Is this constructor correct?
+    constructor(address _task) KeeperCompatibleInterface() {
+        task = _task;
+    }
 
     function timeSinceUpdate() public view returns (uint256) {
         return block.timestamp - lastUpdated;
@@ -41,11 +45,11 @@ contract GitHubUpkeep is KeeperCompatibleInterface {
         lastUpdated = block.timestamp;
 
         // Determine if GitHub issue is closed
-        if (pefrormData == "complete") { // TODO: Figure out how to get this data from the GitHub API
+        if (true /* performData == "complete" */) { // TODO: Figure out how to get this data from the GitHub API
             // If closed, call Task.setTaskComplete()
-            Task task = Task(task);
-            require(task.exists());
-            task.setTaskComplete();
+            Task t = Task(task);
+            require(t.exists());
+            t.setTaskComplete();
         }
         else {
             // If not closed, task is still open

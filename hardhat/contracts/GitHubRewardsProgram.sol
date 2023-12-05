@@ -4,6 +4,7 @@ pragma solidity ^0.8.22;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {Task} from "./Task.sol";
+import {GitHubUpkeep} from "./GitHubUpkeep.sol";
 
 // Main contract
 contract GitHubRewardsProgram {
@@ -26,18 +27,20 @@ contract GitHubRewardsProgram {
         This could involve sending LINK or native tokens to the task contract.
 
       Task Creation and Management:
-        Your existing createTask and cancelTask functions should integrate with the
+        Existing createTask and cancelTask functions should integrate with the
         modified Task.sol contract to ensure seamless cross-chain interactions.
     */
 
     function createTask(string memory _repoId, string memory _taskId) public payable {
         require(taskContracts[_repoId][_taskId] == address(0x0), "Task already exists");
-        address newTask = address(new Task(msg.sender, _repoId, _taskId));
-        taskContracts[_repoId][_taskId] = newTask;
+        //address newTask = address(new Task(msg.sender, _repoId, _taskId));
+        Task newTask = new Task(msg.sender, _repoId, _taskId, address(this));
+        taskContracts[_repoId][_taskId] = address(newTask);
 
         // TODO: create cooresponding upkeep contract and set address in task contract
-        // LIKE THIS? 
-        newTask.setUpkeepContractAddress(address(new GitHubUpkeep(address(newTask))));
+        // LIKE THIS?
+        GitHubUpkeep ghu = new GitHubUpkeep(address(newTask));
+        newTask.setUpkeepContractAddress(address(ghu));
 
         //Transfer attached funds to the new task contract (msg.value)
         // TODO: We might need to change this to be compatible with CCIP

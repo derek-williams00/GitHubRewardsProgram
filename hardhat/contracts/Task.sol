@@ -38,7 +38,7 @@ contract Task is Ownable {
         repoId = _repoId;
         taskId = _taskId;
         taskStatus = TaskStatus.OPEN;
-        contributor = payable(0x0);
+        contributor = payable(address(0x0));
         mainContractAddress = _mainContract;
         exists = true;
     }
@@ -69,20 +69,20 @@ contract Task is Ownable {
     */
 
 
-    function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOwner onlyOpen {
+    function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOpen {
         contributor = payable(_contributor);
         contributorGithubId = _contributorGithubId;
         taskStatus = TaskStatus.IN_PROGRESS;
     }
 
-    function removeContributor() public onlyOwner onlyNotClosed() {
+    function removeContributor() public onlyNotClosed() {
         contributor = payable(0x0);
         contributorGithubId = "";
         contributorPreferredPaymentMethod = "";
         taskStatus = TaskStatus.OPEN;
     }
 
-    function setTaskCanceled() public onlyOwner onlyNotClosed {
+    function setTaskCanceled() public onlyNotClosed {
         // Refund the admin
         // TODO: We might need to change this to be compatible with CCIP
         payable(owner()).transfer(address(this).balance);

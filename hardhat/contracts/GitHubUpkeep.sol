@@ -15,10 +15,10 @@ contract GitHubUpkeep is KeeperCompatibleInterface {
 
     uint256 public lastUpdated;
 
-    address public task;
+    address payable public task;
 
     //TODO: Is this constructor correct?
-    constructor(address _task) KeeperCompatibleInterface() {
+    constructor(address payable _task) KeeperCompatibleInterface() {
         task = _task;
     }
 

@@ -39,7 +39,7 @@ contract GitHubRewardsProgram {
 
         // TODO: create cooresponding upkeep contract and set address in task contract
         // LIKE THIS?
-        GitHubUpkeep ghu = new GitHubUpkeep(address(newTask));
+        GitHubUpkeep ghu = new GitHubUpkeep(payable(address(newTask)));
         newTask.setUpkeepContractAddress(address(ghu));
 
         //Transfer attached funds to the new task contract (msg.value)
@@ -48,13 +48,13 @@ contract GitHubRewardsProgram {
     }
 
     function cancelTask(string memory _repoId, string memory _taskId) public onlyAdmin(_repoId, _taskId) {
-        Task task = Task(taskContracts[_repoId][_taskId]);
+        Task task = Task(payable(taskContracts[_repoId][_taskId]));
         require(task.exists());
         task.setTaskCanceled();
     }
 
     function kickContributor(string memory _repoId, string memory _taskId) public {
-        Task task = Task(taskContracts[_repoId][_taskId]);
+        Task task = Task(payable(taskContracts[_repoId][_taskId]));
         require(task.exists());
         require(task.notClosed());
         task.removeContributor();
@@ -65,14 +65,14 @@ contract GitHubRewardsProgram {
     /**************************/
 
     function joinTask(string memory _repoId, string memory _taskId, string memory _contributorGithubId) public {
-        Task task = Task(taskContracts[_repoId][_taskId]);
+        Task task = Task(payable(taskContracts[_repoId][_taskId]));
         require(task.exists());
         require(task.notClosed());
         task.assignContributor(msg.sender, _contributorGithubId);
     }
 
     function leaveTask(string memory _repoId, string memory _taskId) public {
-        Task task = Task(taskContracts[_repoId][_taskId]);
+        Task task = Task(payable(taskContracts[_repoId][_taskId]));
         require(task.exists());
         require(task.notClosed());
         require(task.contributor() == msg.sender);
@@ -89,27 +89,27 @@ contract GitHubRewardsProgram {
     /**************************/
 
     modifier onlyAdmin(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(taskContracts[_repoId][_taskId]).owner(), "Only the admin can call this function.");
+        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).owner(), "Only the admin can call this function.");
         _;
     }
 
     modifier onlyContributor(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(taskContracts[_repoId][_taskId]).contributor(), "Only the contributor can call this function.");
+        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).contributor(), "Only the contributor can call this function.");
         _;
     }
 
     modifier onlyUpkeepContract(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(taskContracts[_repoId][_taskId]).upkeepContractAddress(), "Only the upkeep contract can call this function.");
+        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).upkeepContractAddress(), "Only the upkeep contract can call this function.");
         _;
     }
 
     modifier onlyMainContract(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(taskContracts[_repoId][_taskId]).mainContractAddress(), "Only the main contract can call this function.");
+        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).mainContractAddress(), "Only the main contract can call this function.");
         _;
     }
 
     modifier onlyOpen(string memory _repoId, string memory _taskId) {
-        require(Task(taskContracts[_repoId][_taskId]).taskStatus() == Task.TaskStatus.OPEN, "This function can only be called for open tasks.");
+        require(Task(payable(taskContracts[_repoId][_taskId])).taskStatus() == Task.TaskStatus.OPEN, "This function can only be called for open tasks.");
         _;
     }
 

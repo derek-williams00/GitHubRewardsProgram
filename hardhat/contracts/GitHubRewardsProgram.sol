@@ -4,7 +4,7 @@ pragma solidity ^0.8.22;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {Task} from "./Task.sol";
-import {GitHubUpkeep} from "./GitHubUpkeep.sol";
+//import {GitHubUpkeep} from "./GitHubUpkeep.sol";
 
 // Main contract
 contract GitHubRewardsProgram {
@@ -21,16 +21,6 @@ contract GitHubRewardsProgram {
     /* ADMIN FUNCTIONS        */
     /**************************/
 
-    /* TODO:
-      Funds Allocation:
-        When creating a task, allocate funds to cover potential CCIP transaction fees.
-        This could involve sending LINK or native tokens to the task contract.
-
-      Task Creation and Management:
-        Existing createTask and cancelTask functions should integrate with the
-        modified Task.sol contract to ensure seamless cross-chain interactions.
-    */
-
     function createTask(string memory _repoId, string memory _taskId) public payable {
         require(taskContracts[_repoId][_taskId] == address(0x0), "Task already exists");
         //address newTask = address(new Task(msg.sender, _repoId, _taskId));
@@ -39,8 +29,8 @@ contract GitHubRewardsProgram {
 
         // TODO: create cooresponding upkeep contract and set address in task contract
         // LIKE THIS?
-        GitHubUpkeep ghu = new GitHubUpkeep(payable(address(newTask)));
-        newTask.setUpkeepContractAddress(address(ghu));
+        //GitHubUpkeep ghu = new GitHubUpkeep(payable(address(newTask)));
+        //newTask.setUpkeepContractAddress(address(ghu));
 
         //Transfer attached funds to the new task contract (msg.value)
         // TODO: We might need to change this to be compatible with CCIP
@@ -95,16 +85,6 @@ contract GitHubRewardsProgram {
 
     modifier onlyContributor(string memory _repoId, string memory _taskId) {
         require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).contributor(), "Only the contributor can call this function.");
-        _;
-    }
-
-    modifier onlyUpkeepContract(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).upkeepContractAddress(), "Only the upkeep contract can call this function.");
-        _;
-    }
-
-    modifier onlyMainContract(string memory _repoId, string memory _taskId) {
-        require(msg.sender == Task(payable(taskContracts[_repoId][_taskId])).mainContractAddress(), "Only the main contract can call this function.");
         _;
     }
 

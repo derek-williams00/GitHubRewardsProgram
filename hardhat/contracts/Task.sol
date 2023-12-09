@@ -10,7 +10,6 @@ contract Task is Ownable {
     // Contributor information
     address payable public contributor;
     string public contributorGithubId;
-    string private contributorPreferredPaymentMethod;
 
     // GitHub Issue information
     string public repoId;
@@ -23,14 +22,10 @@ contract Task is Ownable {
     TaskStatus public taskStatus;
      
     // Upkeep information
-    address public upkeepContractAddress;
+    // address public upkeepContractAddress;
 
     // Main contract address
     address public mainContractAddress;
-
-    // Payment information
-    // TODO: add payment information
-    // How-To: https://www.youtube.com/watch?v=FQe91txqP6k
 
     constructor(address _admin, string memory _repoId, string memory _taskId, address _mainContract) Ownable(_admin) {
         // The task admin is the owner of the contract
@@ -49,25 +44,11 @@ contract Task is Ownable {
     // Receive function
     receive() external payable {}
 
+    /*
     function setUpkeepContractAddress(address _upkeepContractAddress) public onlyMainContract onlyNotClosed {
         upkeepContractAddress = _upkeepContractAddress;
     }
-
-    /* TODO: use a CCIPSender instance
-
-    function transferRewardsCrossChain(address _contributor, uint256 _amount) public onlyUpkeepContract onlyNotClosed {
-        require(address(CCIPSender) != address(0), "CCIP Sender Contract not set");
-        require(_amount <= address(this).balance, "Insufficient balance for rewards");
-
-        // Call CCIP sender contract to initiate cross-chain transfer
-        // CCIPSenderContract is an instance of your CCIP sender contract
-        CCIPSender.transferTokens(_contributor, _amount);
-
-        emit CCIPSender.CrossChainTransferInitiated(_contributor, _amount);
-    }
-    
     */
-
 
     function assignContributor(address _contributor, string memory _contributorGithubId) public onlyOpen {
         contributor = payable(_contributor);
@@ -78,7 +59,6 @@ contract Task is Ownable {
     function removeContributor() public onlyNotClosed() {
         contributor = payable(0x0);
         contributorGithubId = "";
-        contributorPreferredPaymentMethod = "";
         taskStatus = TaskStatus.OPEN;
     }
 
@@ -91,7 +71,7 @@ contract Task is Ownable {
         taskStatus = TaskStatus.CANCELED;
     }
     
-    function setTaskComplete() public onlyUpkeepContract onlyNotClosed {
+    function setTaskComplete() public onlyNotClosed {
         taskStatus = TaskStatus.COMPLETE;
         
         // Send the reward to the contributor
@@ -99,9 +79,11 @@ contract Task is Ownable {
         payable(contributor).transfer(address(this).balance);
     }
 
+/*
     function setContributorPreferredPaymentMethod(string memory _contributorPreferredPaymentMethod) public onlyContributor onlyNotClosed {
         contributorPreferredPaymentMethod = _contributorPreferredPaymentMethod;
     }
+*/
 
     function notClosed() public view returns (bool) {
         return (taskStatus != TaskStatus.CANCELED) && (taskStatus != TaskStatus.COMPLETE);
@@ -114,15 +96,12 @@ contract Task is Ownable {
         _;
     }
 
+/*
     modifier onlyUpkeepContract() {
         require(msg.sender == upkeepContractAddress, "Only the upkeep contract can call this function.");
         _;
     }
-
-    modifier onlyMainContract() {
-        require(msg.sender == mainContractAddress, "Only the main contract can call this function.");
-        _;
-    }
+*/
 
     modifier onlyOpen() {
         require(taskStatus == TaskStatus.OPEN, "This function can only be called for open tasks.");

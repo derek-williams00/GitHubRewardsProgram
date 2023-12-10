@@ -3,8 +3,7 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
 import GHRP from '../../GHRP_abi.json';
 
-const CreateTaskForm = () => {
-  //  const [provider, setProvider] = useState(null);
+const GetTaskForm = () => {
   const [signer, setSigner] = useState(null);
   const [taskId, setTaskId] = useState('');
   const [repoId, setRepoId] = useState('');
@@ -24,7 +23,7 @@ const CreateTaskForm = () => {
     getProviderAndSigner();
   }, []);
 
-  const onCreateTask = async (e) => {
+  const onJoinTask = async (e) => {
     e.preventDefault();
     if (!signer) {
       console.error('No signer available');
@@ -35,7 +34,7 @@ const CreateTaskForm = () => {
     const contract = new ethers.Contract(contractAddress, GHRP, signer);
 
     try {
-      const txResponse = await contract.createTask(taskId, repoId);
+      const txResponse = await contract.leaveTask(taskId, repoId);
       console.log('Transaction Response:', txResponse);
       // Optionally, wait for the transaction to be mined
       const receipt = await txResponse.wait();
@@ -46,35 +45,21 @@ const CreateTaskForm = () => {
   };
 
   return (
-    <div className="p-6 border-solid border-1 rounded-md shadow-md m-2 w-1/4 bg-github-gray animate-popup">
-      <div className="font-bold text-lg cursor-default">Create a new task</div>
-      <form className="flex flex-col" onSubmit={onCreateTask}>
+    <div className="p-6 border-solid border-1 rounded-md shadow-md m-2">
+      <div>Check the tesk status</div>
+      <form className="flex flex-col w-screen">
         <label>
-          <div className="text-left mt-6">Task ID</div>
-          <input
-            placeholder="Type your task ID"
-            type="text"
-            value={taskId}
-            onChange={(e) => setTaskId(e.target.value)}
-            className="w-full p-3 rounded border-solid border border-[#ecebed]"></input>
+          Task ID
+          <input type="text" value={taskId} onChange={(e) => setTaskId(e.target.value)}></input>
         </label>
         <label>
-          <div className="text-left mt-6">Repo ID</div>
-          <input
-            placeholder="Type your repository ID"
-            type="text"
-            value={repoId}
-            onChange={(e) => setRepoId(e.target.value)}
-            className="w-full p-3 rounded border-solid border border-[#ecebed]"></input>
+          Repo ID
+          <input type="text" value={repoId} onChange={(e) => setRepoId(e.target.value)}></input>
         </label>
-        <button
-          type="submit"
-          className="mt-10 border-solid border-1 rounded-lg shadow-md py-4 bg-github-green text-white font-semibold hover:bg-hover-green transition ease-in-out">
-          Create
-        </button>
+        <button type="submit">Check</button>
       </form>
     </div>
   );
 };
 
-export default CreateTaskForm;
+export default GetTaskForm;

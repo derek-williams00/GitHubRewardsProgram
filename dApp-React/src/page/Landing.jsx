@@ -7,21 +7,36 @@ import GHRP from "../../GHRP_abi.json"
 const LandingPage = () => {
     const [hasProvider, setHasProvider] = useState(null);
     const [provider, setProvider] = useState(null);
+    const [network, setNetwork] = useState("");
     const initialState = { accounts: [] };
     const [wallet, setWallet] = useState(initialState);
     const contractAddress = "0xCd4752542c3520DE94D26D47eC549Dc197839b9e";
     const ABI = "OUT CONTRACT'S ABI";
     // This allows us to use the functions in the contract directly
     useEffect(() => {
-       const getProvider = async () => {
-          const provider = await detectEthereumProvider({ silent: true });
-          console.log(provider);
-          setHasProvider(Boolean(provider));
-          setProvider(provider)
-       };
- 
-       getProvider();
+      const initializeProvider = async () => {
+        if (window.ethereum) {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          setProvider(provider);
+          setHasProvider(Boolean(provider))
+        }
+      };
+  
+      initializeProvider();
     }, []);
+
+    useEffect(() => {
+      const getNetwork = async () => {
+        if (provider) {
+          const network = await provider.getNetwork();
+          setNetwork(network.name);
+          console.log("network == ", network)
+        }
+      };
+  
+      getNetwork();
+    }, [provider]);
  
     const updateWallet = async (accounts) => {
        setWallet({ accounts });
@@ -32,7 +47,6 @@ const LandingPage = () => {
           method: "eth_requestAccounts",
        });
        updateWallet(accounts);
-       const contract = new ethers.Contract(contractAddress, ABI, provider);
     };
  
     return (

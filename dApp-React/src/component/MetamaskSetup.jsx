@@ -14,7 +14,7 @@ const MetamaskSetup = () => {
         handleAccountChange();
         handleNetworkChange();
       } else {
-        alert("Please Install Metamask!");
+        alert('Please Install Metamask!');
       }
     };
 
@@ -32,11 +32,13 @@ const MetamaskSetup = () => {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x149f4c',
-              chainName: 'Sepolia',
-              rpcUrls: ['https://rpc.sepolia.org/'],
-            }],
+            params: [
+              {
+                chainId: '0x149f4c',
+                chainName: 'Sepolia',
+                rpcUrls: ['https://rpc.sepolia.org/'],
+              },
+            ],
           });
         } catch (addError) {
           console.error('Failed to add Sepolia to MetaMask', addError);

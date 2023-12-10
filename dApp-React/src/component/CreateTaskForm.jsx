@@ -5,27 +5,45 @@ import GHRP from "../../GHRP_abi.json"
 
 const CreateTaskForm = () => {
 
-  const [provider, setProvider] = useState(null);
+//  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
   const [taskId, setTaskId] = useState("");
   const [repoId, setRepoId] = useState("");
 
   useEffect(() => {
-    const getProvider = async () => {
-       const provider = await detectEthereumProvider({ silent: true });
-       setProvider(provider)
+    const getProviderAndSigner = async () => {
+      const metamaskProvider = await detectEthereumProvider();
+      if (metamaskProvider) {
+        const provider = new ethers.providers.Web3Provider(metamaskProvider);
+        const signer = provider.getSigner();
+        setSigner(signer);
+      } else {
+        console.error("Please install MetaMask!");
+      }
     };
 
-    getProvider();
+    getProviderAndSigner();
  }, []);
 
  const onCreateTask = async (e) => {
   e.preventDefault();
+  if (!signer) {
+    console.error("No signer available");
+    return;
+  }
+
   const contractAddress = "0xCd4752542c3520DE94D26D47eC549Dc197839b9e";
-  const contract = new ethers.Contract(contractAddress, GHRP, provider);
-  console.log("Contract ==", contract);
-  console.log("TaskId == ", taskId);
-  console.log("RepoId == ", repoId);
-  await contract.createTask(taskId, repoId);
+  const contract = new ethers.Contract(contractAddress, GHRP, signer);
+
+  try {
+    const txResponse = await contract.createTask(taskId, repoId);
+    console.log("Transaction Response:", txResponse);
+    // Optionally, wait for the transaction to be mined
+    const receipt = await txResponse.wait();
+    console.log("Transaction Receipt:", receipt);
+  } catch (error) {
+    console.error("Transaction Error:", error);
+  }
  }
 
   return (

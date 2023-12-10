@@ -4,7 +4,6 @@ pragma solidity ^0.8.22;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import {Task} from "./Task.sol";
-//import {GitHubUpkeep} from "./GitHubUpkeep.sol";
 
 // Main contract
 contract GitHubRewardsProgram {
@@ -23,29 +22,22 @@ contract GitHubRewardsProgram {
 
     function createTask(string memory _repoId, string memory _taskId) public payable {
         require(taskContracts[_repoId][_taskId] == address(0x0), "Task already exists");
-        //address newTask = address(new Task(msg.sender, _repoId, _taskId));
         Task newTask = new Task(msg.sender, _repoId, _taskId, address(this));
         taskContracts[_repoId][_taskId] = address(newTask);
-
-        // TODO: create cooresponding upkeep contract and set address in task contract
-        // LIKE THIS?
-        //GitHubUpkeep ghu = new GitHubUpkeep(payable(address(newTask)));
-        //newTask.setUpkeepContractAddress(address(ghu));
-
-        //Transfer attached funds to the new task contract (msg.value)
-        // TODO: We might need to change this to be compatible with CCIP
         payable(newTask).transfer(msg.value);
     }
 
     function cancelTask(string memory _repoId, string memory _taskId) public onlyAdmin(_repoId, _taskId) {
-        Task task = Task(payable(taskContracts[_repoId][_taskId]));
-        require(task.exists());
+        address taskAddress = taskContracts[_repoId][_taskId];
+        require(taskAddress != address(0x0), "Task does not exist");
+        Task task = Task(payable(taskAddress));
         task.setTaskCanceled();
     }
 
-    function kickContributor(string memory _repoId, string memory _taskId) public {
-        Task task = Task(payable(taskContracts[_repoId][_taskId]));
-        require(task.exists());
+    function kickContributor(string memory _repoId, string memory _taskId) public onlyAdmin(_repoId, _taskId) {
+        address taskAddress = taskContracts[_repoId][_taskId];
+        require(taskAddress != address(0x0), "Task does not exist");
+        Task task = Task(payable(taskAddress));
         require(task.notClosed());
         task.removeContributor();
     }
@@ -55,15 +47,17 @@ contract GitHubRewardsProgram {
     /**************************/
 
     function joinTask(string memory _repoId, string memory _taskId, string memory _contributorGithubId) public {
-        Task task = Task(payable(taskContracts[_repoId][_taskId]));
-        require(task.exists());
+        address taskAddress = taskContracts[_repoId][_taskId];
+        require(taskAddress != address(0x0), "Task does not exist");
+        Task task = Task(payable(taskAddress));
         require(task.notClosed());
         task.assignContributor(msg.sender, _contributorGithubId);
     }
 
     function leaveTask(string memory _repoId, string memory _taskId) public {
-        Task task = Task(payable(taskContracts[_repoId][_taskId]));
-        require(task.exists());
+        address taskAddress = taskContracts[_repoId][_taskId];
+        require(taskAddress != address(0x0), "Task does not exist");
+        Task task = Task(payable(taskAddress));
         require(task.notClosed());
         require(task.contributor() == msg.sender);
         task.removeContributor();

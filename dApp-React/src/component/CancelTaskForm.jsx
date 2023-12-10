@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import detectEthereumProvider from "@metamask/detect-provider";
 import { ethers } from "ethers";
 import GHRP from "../../GHRP_abi.json"
+import TASK from "../../Task_abi.json"
 
 const CancelTaskForm = () => {
     const [signer, setSigner] = useState(null);
@@ -39,6 +40,19 @@ const CancelTaskForm = () => {
     // Optionally, wait for the transaction to be mined
     const receipt = await txResponse.wait();
     console.log("Transaction Receipt:", receipt);
+
+    // Get the task contract
+    const taskAddr = await contract.getTask(taskId, repoId);
+
+    // Create a new contract instance for the task
+    const taskContract = new ethers.Contract(taskAddr, TASK, signer);
+
+    // Get the task status
+    const taskStatus = await taskContract.taskStatus();
+
+    console.log(`Task status is ${taskStatus}`);
+
+
   } catch (error) {
     console.error("Transaction Error:", error);
   }

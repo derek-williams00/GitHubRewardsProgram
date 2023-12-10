@@ -1,0 +1,121 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			}
+		],
+		"name": "cancelTask",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			}
+		],
+		"name": "createTask",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_contributorGithubId",
+				"type": "string"
+			}
+		],
+		"name": "joinTask",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			}
+		],
+		"name": "kickContributor",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			}
+		],
+		"name": "leaveTask",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_repoId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "_taskId",
+				"type": "string"
+			}
+		],
+		"name": "getTask",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

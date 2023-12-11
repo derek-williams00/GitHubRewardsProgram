@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MetamaskSetup from "../component/MetamaskSetup";
+import GetTaskForm from "../component/GetTaskForm";
 import RoleSelection from "../layout/RoleSelection";
 
 const Landing = () => {
@@ -7,6 +8,7 @@ const Landing = () => {
        <>
           <div className="App">
              <MetamaskSetup />
+             <GetTaskForm />
              <RoleSelection />
           </div>
        </>

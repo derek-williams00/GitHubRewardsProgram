@@ -1,4 +1,4 @@
-import Landing from './page/Landing';
+import Landing from './page/NewLanding';
 import Admin from './page/Admin';
 import Contributor from './page/Contributor';
 import { Route, Routes } from 'react-router-dom';

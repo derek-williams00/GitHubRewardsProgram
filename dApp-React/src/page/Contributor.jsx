@@ -10,11 +10,18 @@ const Contributor = () => {
         <JoinTaskForm />
         <LeaveTaskForm />
       </div>
-      <Link
-        to="/"
-        className="py-4 px-6 border-solid border-1 rounded-lg shadow-md mt-5 bg-github-black text-white ease-in-out transition hover:bg-black">
-        Go back
-      </Link>
+      <div className="flex flex-row">
+        <Link
+          to="/"
+          className="py-4 px-6 border-solid border-1 rounded-lg shadow-md mt-5 mx-3 bg-github-black text-white ease-in-out transition hover:bg-black">
+          Go home
+        </Link>
+        <Link
+          to="/admin"
+          className="py-4 px-6 border-solid border-1 rounded-lg shadow-md mt-5 mx-3 bg-github-black text-white ease-in-out transition hover:bg-black">
+          Switch to Admin
+        </Link>
+      </div>
     </div>
   );
 };

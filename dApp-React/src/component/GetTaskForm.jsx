@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
 import GHRP from '../../GHRP_abi.json';
+import TASK from '../../Task_abi.json';
+import StatusCard from './StatusCard';
 
 const GetTaskForm = () => {
   const [signer, setSigner] = useState(null);
   const [taskId, setTaskId] = useState('');
   const [repoId, setRepoId] = useState('');
+  const [taskStat, setTaskStat] = useState(0);
 
   useEffect(() => {
     const getProviderAndSigner = async () => {
@@ -23,7 +26,7 @@ const GetTaskForm = () => {
     getProviderAndSigner();
   }, []);
 
-  const onJoinTask = async (e) => {
+  const onGetTask = async (e) => {
     e.preventDefault();
     if (!signer) {
       console.error('No signer available');
@@ -34,30 +37,58 @@ const GetTaskForm = () => {
     const contract = new ethers.Contract(contractAddress, GHRP, signer);
 
     try {
-      const txResponse = await contract.leaveTask(taskId, repoId);
+      const txResponse = await contract.cancelTask(taskId, repoId);
       console.log('Transaction Response:', txResponse);
       // Optionally, wait for the transaction to be mined
       const receipt = await txResponse.wait();
       console.log('Transaction Receipt:', receipt);
+
+      // Get the task contract
+      const taskAddr = await contract.getTask(taskId, repoId);
+
+      // Create a new contract instance for the task
+      const taskContract = new ethers.Contract(taskAddr, TASK, signer);
+
+      // Get the task status
+      const taskStatus = await taskContract.taskStatus();
+
+      setTaskStat(taskStatus + 1);
     } catch (error) {
       console.error('Transaction Error:', error);
     }
   };
 
   return (
-    <div className="p-6 border-solid border-1 rounded-md shadow-md m-2">
-      <div>Check the tesk status</div>
-      <form className="flex flex-col w-screen">
-        <label>
-          Task ID
-          <input type="text" value={taskId} onChange={(e) => setTaskId(e.target.value)}></input>
-        </label>
-        <label>
-          Repo ID
-          <input type="text" value={repoId} onChange={(e) => setRepoId(e.target.value)}></input>
-        </label>
-        <button type="submit">Check</button>
-      </form>
+    <div className="flex flex-row w-screen justify-center items-center">
+      <div className="p-6 border-solid border-1 rounded-md shadow-md m-4 w-1/4 bg-github-gray animate-popup">
+        <div className="font-bold text-lg cursor-default">Get the task information</div>
+        <form className="flex flex-col" onSubmit={onGetTask}>
+          <label>
+            <div className="text-left mt-6">Task ID</div>
+            <input
+              placeholder="Type the task ID"
+              type="text"
+              value={taskId}
+              onChange={(e) => setTaskId(e.target.value)}
+              className="w-full p-3 rounded border-solid border border-[#ecebed]"></input>
+          </label>
+          <label>
+            <div className="text-left mt-6">Repo ID</div>
+            <input
+              placeholder="Type the repository ID"
+              type="text"
+              value={repoId}
+              onChange={(e) => setRepoId(e.target.value)}
+              className="w-full p-3 rounded border-solid border border-[#ecebed]"></input>
+          </label>
+          <button
+            type="submit"
+            className="mt-10 border-solid border-1 rounded-lg shadow-md py-4 bg-github-blue text-white font-semibold hover:bg-hover-blue transition ease-in-out">
+            Check
+          </button>
+        </form>
+      </div>
+      <StatusCard status={taskStat} />
     </div>
   );
 };

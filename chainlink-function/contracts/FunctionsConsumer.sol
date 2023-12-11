@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
+
+import {GitHubRewardsProgram} from "./GitHubRewardsProgram.sol";
 
 /**
  * @title Chainlink Functions example on-demand consumer contract example
@@ -16,6 +18,8 @@ contract FunctionsConsumer is FunctionsClient, ConfirmedOwner {
   bytes32 public s_lastRequestId;
   bytes public s_lastResponse;
   bytes public s_lastError;
+
+  address private mainContractAddress = address(0x0 /* TODO: insert main contract address here */);
 
   constructor(address router, bytes32 _donId) FunctionsClient(router) ConfirmedOwner(msg.sender) {
     donId = _donId;
@@ -71,5 +75,40 @@ contract FunctionsConsumer is FunctionsClient, ConfirmedOwner {
   function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
     s_lastResponse = response;
     s_lastError = err;
+
+    // Parse the response
+    // ---------------------
+    string[] memory parts = new string[](3);
+    uint partIndex = 0;
+    bytes memory tempPart = new bytes(response.length);
+    uint tempIndex = 0;
+    for (uint i = 0; i < response.length; i++) {
+        if (response[i] == bytes1(",")) {
+            parts[partIndex] = bytesToString(tempPart, tempIndex); // Save this part
+            partIndex++; // Move to next part
+            tempIndex = 0; // Reset the tempIndex for next part
+        } else {
+            tempPart[tempIndex] = response[i]; // Copy the character into tempPart
+            tempIndex++; // Move to next index in tempPart
+        }
+    }
+    parts[partIndex] = bytesToString(tempPart, tempIndex);
+    // ---------------------
+
+    // Forward the response to the main contract
+    if(keccak256(abi.encodePacked(string(parts[2]))) == keccak256(abi.encodePacked("closed"))) { // Compare the response to "closed"
+      GitHubRewardsProgram grp = GitHubRewardsProgram(mainContractAddress);
+      grp.updateCompletedTask(string(parts[0]), string(parts[1]));
+    }
   }
+
+  // Helper function to convert bytes to string
+  function bytesToString(bytes memory byteArray, uint length) internal pure returns (string memory) {
+      bytes memory strBytes = new bytes(length);
+      for (uint i = 0; i < length; i++) {
+          strBytes[i] = byteArray[i];
+      }
+      return string(strBytes);
+  }
+
 }

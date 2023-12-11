@@ -51,6 +51,7 @@ const GetTaskForm = () => {
 
       // Get the task status
       const taskStatus = await taskContract.taskStatus();
+      console.log(`Task Status: ${taskStatus}`);
 
       setTaskStat(taskStatus + 1);
     } catch (error) {
